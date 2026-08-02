@@ -92,8 +92,11 @@ export default function EmployeeLedgerIndex({ statements, employees, ledgerEntri
                     </button>
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button onClick={() => setShowSalaryAdjustmentModal(true)} className="btn btn-secondary btn-sm">
-                        ± Adjust Salary / Deduction
+                    <button onClick={() => { salaryForm.setData('entry_type', 'SALARY_PAID'); setShowSalaryAdjustmentModal(true); }} className="btn btn-emerald btn-sm" style={{ background: '#10b981', color: 'white' }}>
+                        💵 Record Salary Paid
+                    </button>
+                    <button onClick={() => { salaryForm.setData('entry_type', 'SALARY_DEDUCTION'); setShowSalaryAdjustmentModal(true); }} className="btn btn-secondary btn-sm">
+                        ± Adjust / Deduction
                     </button>
                     <button onClick={() => setShowAdvanceModal(true)} className="btn btn-primary btn-sm">
                         + Issue Advance
