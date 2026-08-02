@@ -36,7 +36,7 @@ class EmployeeLedgerController extends Controller
             'employee_id' => 'required|exists:employees,id',
             'amount' => 'required|numeric|min:0.01',
             'transaction_date' => 'required|date',
-            'entry_type' => 'required|in:SALARY_DEDUCTION,SALARY_BONUS',
+            'entry_type' => 'required|in:SALARY_PAID,SALARY_DEDUCTION,SALARY_BONUS',
             'description' => 'required|string|max:255',
         ]);
 

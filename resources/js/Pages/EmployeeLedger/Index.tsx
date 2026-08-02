@@ -40,8 +40,8 @@ export default function EmployeeLedgerIndex({ statements, employees, ledgerEntri
     const salaryForm = useForm({
         employee_id: '', amount: 0,
         transaction_date: new Date().toISOString().split('T')[0],
-        entry_type: 'SALARY_DEDUCTION',
-        description: 'Salary Adjustment / Deduction',
+        entry_type: 'SALARY_PAID',
+        description: 'Monthly Salary Payment',
     });
 
     const handleGiveAdvance = (e: React.FormEvent) => {
@@ -262,6 +262,7 @@ export default function EmployeeLedgerIndex({ statements, employees, ledgerEntri
                                     <div className="form-group" style={{ margin: 0 }}>
                                         <label className="form-label">Type *</label>
                                         <select className="form-input" value={salaryForm.data.entry_type} onChange={e => salaryForm.setData('entry_type', e.target.value)}>
+                                            <option value="SALARY_PAID">Salary Payment (Paid)</option>
                                             <option value="SALARY_DEDUCTION">Deduction (-)</option>
                                             <option value="SALARY_BONUS">Extra Bonus (+)</option>
                                         </select>
