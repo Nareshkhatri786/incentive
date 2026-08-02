@@ -36,25 +36,13 @@ class PayrollCalculator
             ->where('entry_type', 'SALARY_BONUS')
             ->sum('amount');
 
-        $paymentsMade = EmployeeLedger::where('employee_id', $employeeId)
-            ->where('entry_type', 'PAYMENT_DEBIT')
+        $salaryPaid = EmployeeLedger::where('employee_id', $employeeId)
+            ->where('entry_type', 'SALARY_PAID')
             ->sum('amount');
-
-        // Site visit bonus calculation for current month
-        $currentMonth = now()->format('Y-m');
-        $monthlyVisits = SiteVisit::where('employee_id', $employeeId)
-            ->where('visit_date', 'like', "$currentMonth%")
-            ->sum('visit_count');
-
-        $visitBonus = 0;
-        if ($monthlyVisits >= 50) $visitBonus = 1500;
-        elseif ($monthlyVisits >= 40) $visitBonus = 1000;
-        elseif ($monthlyVisits >= 30) $visitBonus = 750;
-        elseif ($monthlyVisits >= 20) $visitBonus = 500;
 
         $monthlySalary = $employee->status === 'Active' ? $employee->monthly_salary : 0;
 
-        $netPayable = ($monthlySalary + $incentivesEarned + $visitBonus + $salaryBonuses) - ($activeAdvances + $salaryDeductions + $paymentsMade);
+        $netPayable = ($monthlySalary + $incentivesEarned + $visitBonus + $salaryBonuses) - ($activeAdvances + $salaryDeductions + $paymentsMade + $salaryPaid);
 
         return [
             'employee' => $employee,
