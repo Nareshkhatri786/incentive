@@ -51,6 +51,10 @@ class PayrollCalculator
         elseif ($monthlyVisits >= 30) $visitBonus = 750;
         elseif ($monthlyVisits >= 20) $visitBonus = 500;
 
+        $salaryPaid = EmployeeLedger::where('employee_id', $employeeId)
+            ->where('entry_type', 'SALARY_PAID')
+            ->sum('amount');
+
         $monthlySalary = $employee->status === 'Active' ? $employee->monthly_salary : 0;
 
         $netPayable = ($monthlySalary + $incentivesEarned + $visitBonus + $salaryBonuses) - ($activeAdvances + $salaryDeductions + $paymentsMade + $salaryPaid);
