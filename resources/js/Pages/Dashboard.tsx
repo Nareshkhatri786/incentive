@@ -1,5 +1,6 @@
 import React from 'react';
 import Layout from '../Layouts/Layout';
+import { Link } from '@inertiajs/react';
 
 interface DashboardMetrics {
     total_business: number;
@@ -135,6 +136,33 @@ export default function Dashboard({ metrics, recentCollections, recentExpenses, 
 
     return (
         <Layout title="Executive Operations Dashboard" subtitle="Real-time financial & operational overview">
+            {/* Quick Actions Bar */}
+            <div className="card" style={{ padding: '1rem 1.25rem', marginBottom: '1.5rem', background: 'linear-gradient(135deg, rgba(59,130,246,0.06), rgba(139,92,246,0.04))', borderColor: 'rgba(59,130,246,0.2)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span style={{ fontSize: '1.1rem' }}>⚡</span>
+                        <div>
+                            <div style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-primary)' }}>Quick Actions</div>
+                            <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Fast shortcuts for daily real estate operations</div>
+                        </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                        <Link href={route('bookings.index')} className="btn btn-primary btn-sm" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span>📑</span> + New Booking
+                        </Link>
+                        <Link href={route('collections.index')} className="btn btn-sm" style={{ background: '#10b981', color: 'white', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span>💰</span> + Receive Payment
+                        </Link>
+                        <Link href={route('visits.index')} className="btn btn-sm" style={{ background: '#f59e0b', color: 'white', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span>📍</span> + Log Site Visit
+                        </Link>
+                        <Link href={route('payroll.index')} className="btn btn-secondary btn-sm" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span>💸</span> Pay Salary / Advance
+                        </Link>
+                    </div>
+                </div>
+            </div>
+
             {/* Collection Progress Bar */}
             <div className="card" style={{ padding: '1.25rem 1.5rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
                 <div style={{ flex: 1 }}>

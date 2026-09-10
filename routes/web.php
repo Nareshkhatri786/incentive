@@ -9,6 +9,7 @@ use App\Http\Controllers\CollectionController;
 use App\Http\Controllers\EmployeeLedgerController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SiteVisitController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -36,6 +37,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
     Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
     Route::post('/bookings/{booking}/status', [BookingController::class, 'updateStatus'])->name('bookings.status.update');
+
+    Route::get('/visits', [SiteVisitController::class, 'index'])->name('visits.index');
+    Route::post('/visits', [SiteVisitController::class, 'store'])->name('visits.store');
+    Route::delete('/visits/{visit}', [SiteVisitController::class, 'destroy'])->name('visits.destroy');
 
     Route::get('/collections', [CollectionController::class, 'index'])->name('collections.index');
     Route::post('/collections', [CollectionController::class, 'store'])->name('collections.store');

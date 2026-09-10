@@ -15,10 +15,29 @@ class CollectionController extends Controller
     {
         $collections = CollectionLedger::with(['booking.project'])
             ->orderBy('payment_date', 'desc')
+            ->orderBy('id', 'desc')
             ->get();
+
+        $bookings = Booking::with(['project', 'collections'])
+            ->where('status', '!=', 'Cancelled')
+            ->orderBy('id', 'desc')
+            ->get()
+            ->map(function ($b) {
+                $collected = $b->collections->sum('amount');
+                return [
+                    'id' => $b->id,
+                    'customer_name' => $b->customer_name,
+                    'unit_number' => $b->unit_number,
+                    'project_name' => $b->project->name ?? '',
+                    'basic_amount' => $b->basic_amount,
+                    'total_collected' => $collected,
+                    'pending_balance' => max(0, $b->basic_amount - $collected),
+                ];
+            });
 
         return Inertia::render('Collections/Index', [
             'collections' => $collections,
+            'bookings' => $bookings,
         ]);
     }
 

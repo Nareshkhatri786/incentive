@@ -68,6 +68,7 @@ class PayrollCalculator
             'salary_deductions' => $salaryDeductions,
             'salary_bonuses' => $salaryBonuses,
             'payments_made' => $paymentsMade,
+            'salary_paid' => $salaryPaid,
             'monthly_visits' => $monthlyVisits,
             'visit_bonus' => $visitBonus,
             'net_payable' => max(0, $netPayable),

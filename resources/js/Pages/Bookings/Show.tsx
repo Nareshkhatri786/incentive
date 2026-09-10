@@ -23,6 +23,26 @@ const statusConfig: Record<string, string> = {
 export default function BookingShow({ booking }: Props) {
     const statusForm = useForm({ status: booking.status });
     const [showStatusModal, setShowStatusModal] = useState(false);
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
+
+    const paymentForm = useForm({
+        booking_id: booking.id,
+        amount: '',
+        payment_mode: 'NEFT_RTGS',
+        payment_date: new Date().toISOString().split('T')[0],
+        reference_number: '',
+        notes: '',
+    });
+
+    const handleRecordPayment = (e: React.FormEvent) => {
+        e.preventDefault();
+        paymentForm.post(route('collections.store'), {
+            onSuccess: () => {
+                setShowPaymentModal(false);
+                paymentForm.reset('amount', 'reference_number', 'notes');
+            },
+        });
+    };
 
     const handleUpdateStatus = (e: React.FormEvent) => {
         e.preventDefault();
@@ -106,8 +126,17 @@ export default function BookingShow({ booking }: Props) {
                     {/* Collection History */}
                     <div className="card">
                         <div style={{ padding: '0.875rem 1.25rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div className="section-title">Payment History</div>
-                            <span className="badge badge-emerald">{booking.collections.length} payments</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <div className="section-title">Payment History</div>
+                                <span className="badge badge-emerald">{booking.collections.length} payments</span>
+                            </div>
+                            <button
+                                onClick={() => setShowPaymentModal(true)}
+                                className="btn btn-primary btn-sm"
+                                style={{ display: 'flex', alignItems: 'center', gap: '5px' }}
+                            >
+                                <span>💰</span> + Add Payment
+                            </button>
                         </div>
                         <div className="table-container">
                             <table className="data-table">
@@ -174,6 +203,94 @@ export default function BookingShow({ booking }: Props) {
                                 <button type="button" className="btn btn-secondary btn-sm" onClick={() => setShowStatusModal(false)}>Cancel</button>
                                 <button type="submit" className="btn btn-primary btn-sm" disabled={statusForm.processing}>
                                     {statusForm.processing ? 'Saving...' : 'Update Status'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+            {/* Payment Modal */}
+            {showPaymentModal && (
+                <div className="modal-overlay" onClick={() => setShowPaymentModal(false)}>
+                    <div className="modal" style={{ maxWidth: 420 }} onClick={e => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <div className="modal-title">Add Payment for {booking.customer_name}</div>
+                            <button onClick={() => setShowPaymentModal(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '1rem' }}>✕</button>
+                        </div>
+                        <form onSubmit={handleRecordPayment}>
+                            <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
+                                <div style={{ padding: '0.625rem 0.875rem', background: 'rgba(59,130,246,0.06)', borderRadius: '8px', border: '1px solid rgba(59,130,246,0.15)', display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem' }}>
+                                    <div>Total Cost: <b>₹{fmt(booking.basic_amount)}</b></div>
+                                    <div>Pending: <b style={{ color: '#f87171' }}>₹{fmt(booking.pending_balance)}</b></div>
+                                </div>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                                    <div className="form-group" style={{ margin: 0 }}>
+                                        <label className="form-label">Amount (₹) *</label>
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            className="form-input"
+                                            placeholder="e.g. 50000"
+                                            value={paymentForm.data.amount}
+                                            onChange={e => paymentForm.setData('amount', e.target.value)}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="form-group" style={{ margin: 0 }}>
+                                        <label className="form-label">Payment Mode *</label>
+                                        <select
+                                            className="form-input"
+                                            value={paymentForm.data.payment_mode}
+                                            onChange={e => paymentForm.setData('payment_mode', e.target.value)}
+                                            required
+                                        >
+                                            <option value="NEFT_RTGS">NEFT / RTGS</option>
+                                            <option value="Cheque">Cheque</option>
+                                            <option value="UPI">UPI</option>
+                                            <option value="Cash">Cash</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                                    <div className="form-group" style={{ margin: 0 }}>
+                                        <label className="form-label">Date *</label>
+                                        <input
+                                            type="date"
+                                            className="form-input"
+                                            value={paymentForm.data.payment_date}
+                                            onChange={e => paymentForm.setData('payment_date', e.target.value)}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="form-group" style={{ margin: 0 }}>
+                                        <label className="form-label">Ref / Cheque No.</label>
+                                        <input
+                                            type="text"
+                                            className="form-input"
+                                            placeholder="e.g. UTR / Chq No."
+                                            value={paymentForm.data.reference_number}
+                                            onChange={e => paymentForm.setData('reference_number', e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="form-group" style={{ margin: 0 }}>
+                                    <label className="form-label">Notes</label>
+                                    <input
+                                        type="text"
+                                        className="form-input"
+                                        placeholder="e.g. Instalment payment"
+                                        value={paymentForm.data.notes}
+                                        onChange={e => paymentForm.setData('notes', e.target.value)}
+                                    />
+                                </div>
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary btn-sm" onClick={() => setShowPaymentModal(false)}>Cancel</button>
+                                <button type="submit" className="btn btn-primary btn-sm" disabled={paymentForm.processing}>
+                                    {paymentForm.processing ? 'Saving...' : 'Record Payment'}
                                 </button>
                             </div>
                         </form>

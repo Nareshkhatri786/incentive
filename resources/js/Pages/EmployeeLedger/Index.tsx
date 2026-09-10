@@ -4,8 +4,11 @@ import { useForm } from '@inertiajs/react';
 
 interface EmployeeStatement {
     employee: { id: number; name: string; role: string };
+    monthly_salary?: number;
     incentives_earned: number; incentives_paid: number;
     active_advances: number; payments_made: number;
+    salary_deductions?: number; salary_bonuses?: number;
+    salary_paid?: number;
     monthly_visits: number; visit_bonus: number; net_payable: number;
 }
 interface LedgerEntry {
@@ -28,8 +31,8 @@ const entryTypeConfig: Record<string, string> = {
 export default function EmployeeLedgerIndex({ statements, employees, ledgerEntries }: Props) {
     const [showAdvanceModal, setShowAdvanceModal] = useState(false);
     const [activeTab, setActiveTab] = useState<'statements' | 'ledger'>('statements');
-
     const [showSalaryAdjustmentModal, setShowSalaryAdjustmentModal] = useState(false);
+    const [selectedStatement, setSelectedStatement] = useState<EmployeeStatement | null>(null);
 
     const advanceForm = useForm({
         employee_id: '', amount: 0,
@@ -153,6 +156,18 @@ export default function EmployeeLedgerIndex({ statements, employees, ledgerEntri
                                         <div style={{ fontSize: '0.85rem', fontWeight: 800, color: m.color }}>{m.value}</div>
                                     </div>
                                 ))}
+                            </div>
+
+                            {/* Card Footer */}
+                            <div style={{ padding: '0.625rem 1rem', borderTop: '1px solid var(--border)', background: 'rgba(99,130,200,0.03)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Base Salary: <b>₹{fmt(st.monthly_salary)}</b></span>
+                                <button
+                                    onClick={() => setSelectedStatement(st)}
+                                    className="btn btn-secondary btn-sm"
+                                    style={{ padding: '3px 10px', fontSize: '0.72rem', display: 'flex', alignItems: 'center', gap: '4px' }}
+                                >
+                                    <span>🧾</span> Breakdown
+                                </button>
                             </div>
                         </div>
                     ))}
@@ -291,6 +306,116 @@ export default function EmployeeLedgerIndex({ statements, employees, ledgerEntri
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal: Itemized Settlement Statement */}
+            {selectedStatement && (
+                <div className="modal-overlay" onClick={() => setSelectedStatement(null)}>
+                    <div className="modal" style={{ maxWidth: 480 }} onClick={e => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <div>
+                                <div className="modal-title">Settlement Statement</div>
+                                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{selectedStatement.employee.name} · {selectedStatement.employee.role}</div>
+                            </div>
+                            <button onClick={() => setSelectedStatement(null)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '1.2rem' }}>✕</button>
+                        </div>
+                        <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                            <div style={{ background: 'rgba(59,130,246,0.04)', border: '1px solid var(--border)', borderRadius: '8px', padding: '0.875rem' }}>
+                                <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.5rem' }}>
+                                    Earnings & Credits (+)
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '0.35rem' }}>
+                                    <span>Base Monthly Salary</span>
+                                    <b style={{ color: 'var(--text-primary)' }}>+₹{fmt(selectedStatement.monthly_salary)}</b>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '0.35rem' }}>
+                                    <span>Eligible Incentives Earned</span>
+                                    <b style={{ color: '#34d399' }}>+₹{fmt(selectedStatement.incentives_earned)}</b>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '0.35rem' }}>
+                                    <span>Site Visit Bonus ({selectedStatement.monthly_visits} visits)</span>
+                                    <b style={{ color: '#fbbf24' }}>+₹{fmt(selectedStatement.visit_bonus)}</b>
+                                </div>
+                                {(Number(selectedStatement.salary_bonuses) || 0) > 0 && (
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '0.35rem' }}>
+                                        <span>Special Bonus / Additions</span>
+                                        <b style={{ color: '#34d399' }}>+₹{fmt(selectedStatement.salary_bonuses)}</b>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div style={{ background: 'rgba(239,68,68,0.03)', border: '1px solid var(--border)', borderRadius: '8px', padding: '0.875rem' }}>
+                                <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.5rem' }}>
+                                    Deductions & Past Payments (-)
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '0.35rem' }}>
+                                    <span>Active Advances Taken</span>
+                                    <b style={{ color: '#f87171' }}>-₹{fmt(selectedStatement.active_advances)}</b>
+                                </div>
+                                {(Number(selectedStatement.salary_deductions) || 0) > 0 && (
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '0.35rem' }}>
+                                        <span>Salary Deductions</span>
+                                        <b style={{ color: '#f87171' }}>-₹{fmt(selectedStatement.salary_deductions)}</b>
+                                    </div>
+                                )}
+                                {(Number(selectedStatement.salary_paid) || 0) > 0 && (
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '0.35rem' }}>
+                                        <span>Salary Already Paid</span>
+                                        <b style={{ color: '#f87171' }}>-₹{fmt(selectedStatement.salary_paid)}</b>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Net Settlement Banner */}
+                            <div style={{ background: 'rgba(59,130,246,0.08)', border: '1.5px solid #3b82f6', borderRadius: '10px', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <div>
+                                    <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#3b82f6', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Net Settlement Payable</div>
+                                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 2 }}>Ready for payout</div>
+                                </div>
+                                <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#60a5fa' }}>
+                                    ₹{fmt(selectedStatement.net_payable)}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="modal-footer" style={{ justifyContent: 'space-between' }}>
+                            <button type="button" className="btn btn-secondary btn-sm" onClick={() => setSelectedStatement(null)}>Close</button>
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                <button
+                                    type="button"
+                                    className="btn btn-secondary btn-sm"
+                                    onClick={() => {
+                                        advanceForm.setData('employee_id', String(selectedStatement.employee.id));
+                                        setSelectedStatement(null);
+                                        setShowAdvanceModal(true);
+                                    }}
+                                >
+                                    + Issue Advance
+                                </button>
+                                {selectedStatement.net_payable > 0 && (
+                                    <button
+                                        type="button"
+                                        className="btn btn-primary btn-sm"
+                                        style={{ background: '#10b981', color: 'white' }}
+                                        onClick={() => {
+                                            salaryForm.setData({
+                                                employee_id: String(selectedStatement.employee.id),
+                                                amount: selectedStatement.net_payable,
+                                                transaction_date: new Date().toISOString().split('T')[0],
+                                                entry_type: 'SALARY_PAID',
+                                                description: `Settlement Payout for ${selectedStatement.employee.name}`,
+                                            });
+                                            setSelectedStatement(null);
+                                            setShowSalaryAdjustmentModal(true);
+                                        }}
+                                    >
+                                        💵 Pay Settlement Now
+                                    </button>
+                                )}
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}

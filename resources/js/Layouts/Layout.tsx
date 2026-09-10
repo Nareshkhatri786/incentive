@@ -12,6 +12,7 @@ const navItems = [
     { href: 'projects.index', label: 'Projects & Rules', icon: '⬡', section: 'Management' },
     { href: 'employees.index', label: 'Employees', icon: '◉', section: 'Management' },
     { href: 'bookings.index', label: 'Bookings', icon: '◫', section: 'Management' },
+    { href: 'visits.index', label: 'Site Visits', icon: '📍', section: 'Management' },
     { href: 'collections.index', label: 'Collections', icon: '◈', section: 'Finance' },
     { href: 'payroll.index', label: 'Payroll & Advances', icon: '⬡', section: 'Finance' },
     { href: 'expenses.index', label: 'Expenses', icon: '◎', section: 'Finance' },
